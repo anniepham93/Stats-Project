@@ -1,0 +1,337 @@
+---
+title: 'Online Harassment: How serious is it?'
+author: "Annie Pham"
+date: "5/5/2021"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+# *Background*  
+I decided to look at the topic of online harassment because while it has always been such a hot topic in the internet era, there is not enough research on the topic in regards to gender.  
+
+*Source:* The data was downloaded from the American Trends Panel collected by the [Pew Research Center](https://www.pewresearch.org/american-trends-panel-datasets/).  
+
+# *Data Cleaning:*  
+## Part One - recoding and cleaning
+* Waves 4, 24, and 32 were downloaded, recoded, and merged to create ATP, the American Trends Panel. Because the data was collected and analyzed in SPSS, the column names were recoded to match the answer choices in the ATP survey, and the values were recoded from numerical values represeting the answer choices into character values reflecting the same answer choices. The following included what the original datasets looked like:
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(sjPlot)
+library(haven)
+ATP_W4 <- read_sav("wave4-2014/W4_Jun14/ATP W4.sav")
+ATP_W24 <- read_sav("wave24-2017/W24_Jan17/ATP W24.sav")
+ATP_W32 <- read_sav("wave32-2018/W32_Feb18/ATP W32.sav")
+glimpse(ATP_W4)
+glimpse(ATP_W24)
+glimpse(ATP_W32)
+```  
+
+***
+## Part Two - Using Chi-Squared tests to focus on variables with the best significance  
+* While this is technically analysis, I still consider this part to be data cleaning as I am using chi-square tests on the nominal variables to decide which variables to focus on. Running the chi-square tests allowed me to look at the following variables in the final clean dataset:  
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+ATP_v2 <- read_csv("ATP_v2.csv")
+glimpse(ATP_v2)
+```
+# *Data Exploration*
+Frequency
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(plotly)
+frequency_by_race <- ggplot(ATP_v2, aes(y=sex, x=race, color=race, group=sex)) + geom_count(alpha=0.5) + labs(title="Frequency by Race", x="Race", y="Sex", size="")
+ggplotly(frequency_by_race)
+```
+Based on the frequency chart, we can see that we have the following:  
+
+* 35 Asian male-identifying respondents  
+* 22 Asian female-identifying respondents   
+* 57 Black male-identifying respondents   
+* 74 Black female-identifying respondents   
+* 34 mixed-race male-identifying respondents  
+* 35 mixed-race female-identifying respondents   
+* 26 male-identifying respondents who selected 'other'  
+* 37 female-identifying respondents who selected 'other'  
+* 879 White male-identifying respondents   
+* 898 White female-identifying respondents  
+
+***  
+
+Measure of Central Tendency: Mode  
+Because the dataset only has nominal variables, the best measure of central tendency for the mode
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+### creating tables
+increase_focus_harassment_interact <- as.data.frame(table(ATP_v2$increase_focus_harassment_interact))
+harass_experience <- as.data.frame(table(ATP_v2$harass_experience))
+harass_setting <- as.data.frame(table(ATP_v2$harass_setting))
+women_obstacles <- as.data.frame(table(ATP_v2$women_obstacles))
+problem_harass <- as.data.frame(table(ATP_v2$problem_harass))
+problem_false_info <- as.data.frame(table(ATP_v2$problem_false_info))
+problem_time_waste <- as.data.frame(table(ATP_v2$problem_time_waste))
+welcome_socialnetwork <- as.data.frame(table(ATP_v2$welcome_socialnetwork))
+welcome_online_dating <- as.data.frame(table(ATP_v2$welcome_online_dating))
+welcome_discussion_forum <- as.data.frame(table(ATP_v2$welcome_discussion_forum))
+offensive_content <- as.data.frame(table(ATP_v2$offensive_content))
+online_freedom <- as.data.frame(table(ATP_v2$online_freedom))
+untrue_post <- as.data.frame(table(ATP_v2$untrue_post))
+experience_hacking <- as.data.frame(table(ATP_v2$experience_hacking))
+experience_trolling <- as.data.frame(table(ATP_v2$experience_trolling))
+personal_offensive_names <- as.data.frame(table(ATP_v2$personal_offensive_names))
+personal_physical_threat <- as.data.frame(table(ATP_v2$personal_physical_threat))
+personal_sexual_harass <- as.data.frame(table(ATP_v2$personal_sexual_harass))
+upset_scale <- as.data.frame(table(ATP_v2$upset_scale))
+env_online_dating <- as.data.frame(table(ATP_v2$env_online_dating))
+still_consider_harassment <- as.data.frame(table(ATP_v2$still_consider_harassment))
+### isolating the mode 
+env_online_dating <- env_online_dating[2,]
+experience_hacking <- experience_hacking[2,]
+experience_trolling <- experience_trolling[2,]
+harass_experience <- harass_experience[1,]
+harass_setting <- harass_setting[1,]
+increase_focus_harassment_interact <- increase_focus_harassment_interact[2,]
+offensive_content <- offensive_content[1,]
+online_freedom <- online_freedom[2,]
+personal_offensive_names <- personal_offensive_names[2,]
+personal_physical_threat <- personal_physical_threat[2,]
+personal_sexual_harass <- personal_sexual_harass[2,]
+problem_false_info <- problem_false_info[1,]
+problem_harass <- problem_harass[1,]
+problem_time_waste <- problem_time_waste[1,]
+still_consider_harassment <- still_consider_harassment[3,]
+untrue_post <- untrue_post[1,]
+upset_scale <- upset_scale[1,]
+welcome_discussion_forum <- welcome_discussion_forum[1,]
+welcome_online_dating <- welcome_online_dating[1,]
+welcome_socialnetwork <- welcome_socialnetwork[1,]
+women_obstacles <- women_obstacles[2,]
+### creating variable name
+Variable_Name <- c("increase_focus_harassment interact", "harass_experience", 
+                   "harass_setting", "women_obstacles", "problem_harass", "problem_false_info", "problem_time_waste", 
+                   "welcome_socialnetwork", "welcome_online_dating", 
+                   "welcome_discussion_forum", "offensive_content", 
+                   "online_freedom", "untrue_post", "experience_hacking", 
+                   "experience_trolling", "personal_offensive_names", "personal_physical_threat", 
+                   "personal_sexual_harass", "upset_scale", "env_online_dating", 
+                   "still_consider_harassment")
+Variable_Name <- as.data.frame(Variable_Name)
+###combining into one dataset
+Variable_modes <- bind_rows(increase_focus_harassment_interact, harass_experience, 
+                            harass_setting, women_obstacles, problem_harass, problem_false_info, problem_time_waste, 
+                            welcome_socialnetwork, welcome_online_dating, welcome_discussion_forum, 
+                            offensive_content, online_freedom, untrue_post, experience_hacking, 
+                            experience_trolling, personal_offensive_names, 
+                            personal_physical_threat, personal_sexual_harass, 
+                            upset_scale, env_online_dating, still_consider_harassment)
+Variable_modes_final <- cbind(Variable_Name, Variable_modes)
+names(Variable_modes_final)[2] <- "Answer_Choice"
+library(knitr)
+library(htmlTable)
+htmlTable(Variable_modes_final)
+```  
+Based on the measure of central tendency, it seems as if harassment is an issue overall. However, it is important to remember that more women responded to the survey than men, so it is important to see a breakdown by gender for these variables.  
+
+# *Visualizations*  
+
+From the table, we can see that both men and women feel that the focus on sexual harassment made it harder for men to interact with women in the workplace.  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$increase_focus_harassment_interact, 
+                 title = "Has the increased focus on sexual harassment made it harder/easier 
+                 for men to interact with women in the workplace?", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$increase_focus_harassment_interact, 
+                  margin = "row", bar.pos = "dodge", coord.flip = FALSE, 
+                  title="Has the increased focus on sexual harassment made it harder/easier 
+                  for men to interact with women in the workplace?", show.n = FALSE, 
+                  show.prc = FALSE)
+```  
+
+***
+This table shows that while the majority of women have experienced sexual harassment, the majority of men have not.  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$harass_experience, 
+                 title = "Have you ever received unwanted sexual advances or verbal 
+                 or physical harassment of a sexual nature?", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$harass_experience, margin = "row", bar.pos = "dodge", 
+                  coord.flip = FALSE, title="Have you ever received unwanted sexual 
+                  advances or verbal or physical harassment of a sexual nature?", 
+                  show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+This table shows that the majority of women believe that there are still significant obstacles that make it harder for women to get ahead than men, while the majority of men believe the opposite.  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$women_obstacles, 
+                 title = "Which statement comes closer to your own views: 
+                 A) The obstacles that once made it harder for women than men to 
+                 get ahead are now largely gone; B) There are still significant obstacles 
+                 that make it harder for women to get ahead than men", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$women_obstacles, margin = "row", bar.pos = "dodge", 
+                  coord.flip = FALSE, title="The obstacles that once made it harder 
+                  for women than men to get ahead are now largely gone VS There are 
+                  still significant obstacles that make it harder for women to get 
+                  ahead than men", show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+Both men and women see people being bullied or hrassed online as major problem:  
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$problem_harass, 
+                 title = "How much of a problem, if at all, are the following: 
+                 People being harassed or bullied", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$problem_harass, margin = "row", bar.pos = "dodge", 
+                  coord.flip = FALSE, title="Problem - People being harassed or 
+                  bullied", show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+Both men and women see people seeing false or inaccurate information as being a major problem:  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$problem_false_info, 
+                 title = "How much of a problem, if at all, are the following: 
+                 People seeing false or inaccurate information", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$problem_false_info, margin = "row", bar.pos = "dodge", 
+                  coord.flip = FALSE, title="Problem - False or inaccurate information 
+                  being shown", show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+However... while most women believe that offensive content is too often excused as not a big deal, most men seem to think that people take offensive content online too seriously.  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$offensive_content, 
+                 title = "Which comes closer to your view: A) Offensive content 
+                 online is too often excused as not a big deal; B) Many people 
+                 take offensive content they see online too seriously", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$offensive_content, margin = "row", bar.pos = "dodge", 
+                  coord.flip = FALSE, title="Offensive content online is too often excused 
+                  as not a big deal VS Many people take offensive content they see 
+                  online too seriously", show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+Additionally, while the majority of women believe that online safety is important, the majority of men believe that people should be able to speak their minds freely on the internet.  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$online_freedom, 
+                 title = "Which do you think is more important: A) People being 
+                 able to speak their minds freely online; B) People being able to 
+                 feel welcome and safe online", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$online_freedom, margin = "row", bar.pos = "dodge", 
+                  coord.flip = FALSE, title="People being able to speak their minds 
+                  freely online VS People being able to feel welcome and safe online", 
+                  show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+Both male and female respondents have experienced being hacked.  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$experience_hacking, 
+                 title = "Have any of these ever happened to you, personally: 
+                 Hacking", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$experience_hacking, margin = "row", bar.pos = "dodge", 
+                  coord.flip = FALSE, title="Have any of these ever happened to you 
+                  personally: Hacking", show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+Both male and female respondents have experienced being trolled* on the internet  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$experience_trolling, 
+                 title = "Have any of these ever happened to you, personally: 
+                 Trolling", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$experience_trolling, margin = "row", bar.pos = "dodge", 
+                  coord.flip = FALSE, title="Have any of these ever happened to you 
+                  personally: Trolling", show.n = FALSE, show.prc = FALSE)
+```  
+  
+  
+***
+As expected, both male and female respondents have experienced being called offensive names online:  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$personal_offensive_names, 
+                 title = "Which of the following have happened to you, personally, 
+                 ONLINE?: Been called offensive names", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$personal_offensive_names, margin = "row", 
+                  bar.pos = "dodge", coord.flip = FALSE, title="Which of the 
+                  following have happened to you personally, ONLINE?: Been called 
+                  offensive names", show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+Likewise, the majority for both male and female respondents have experienced being physically threatened.  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$personal_physical_threat, 
+                 title = "Which of the following have happened to you, personally, 
+                 ONLINE?: Been physically threatened", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$personal_physical_threat, margin = "row", 
+                  bar.pos = "dodge", coord.flip = FALSE, title="Which of the following 
+                  have happened to you personally, ONLINE?: Been physically threatened", 
+                  show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+A slightly higher percent of men have been sexually harassed online! Only slightly, however.  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$personal_sexual_harass, 
+                 title = "Which of the following have happened to you, personally, 
+                 ONLINE?: Been sexually harassed", show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$personal_sexual_harass, margin = "row", 
+                  bar.pos = "dodge", coord.flip = FALSE, title="Which of the following 
+                  have happened to you personally, ONLINE?: Been sexually harassed", 
+                  show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+Finally, while more women still consider their experiences to be online harassment, more men no longer believe it to be the case. Weird!  
+
+![](https://bookdown.org/wadetroberts/bookdown-demo/files/CramersV.PNG)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sjPlot::tab_xtab(var.row = ATP_v2$sex, var.col = ATP_v2$still_consider_harassment, 
+                 title = "Still thinking about your most recent experience, do 
+                 you consider what happened to you to be online harassment or not?", 
+                 show.row.prc = TRUE)
+sjPlot::plot_xtab(ATP_v2$sex, ATP_v2$still_consider_harassment, margin = "row", 
+                  bar.pos = "dodge", coord.flip = FALSE, title="Still thinking about 
+                  your most recent experience, do you consider what happened to 
+                  you to be online harassment or not?", show.n = FALSE, show.prc = FALSE)
+```  
+
+***
+*Key Takeaways*  
+
+* More men than women believe that the obstacles that make it harder for women to get ahead than men are now gone while more women believe that is obviously not the case.  
+* Both men and women have shown that they have experienced online harassment in forms of bullying, physical threats, and sexual harassments online  
+* Yet more men still believe that people should not take offensive content seriously  
+* Additionally, more men still believe that online free speech is more important than internet safety. 
+
+![](https://media.giphy.com/media/NORFfJzhC6iPe/giphy.gif)
+
+***
+
+*Limitations and Possibilities for Further Analysis*  
+
+* Because the data collection was survey data, getting people to respond to surveys is tough, so there were several NA's throughout the dataset. For example, if a respondent completed a survey from Wave 4, but not the survey from Wave 24, only to return to complete the survey from Wave 32, then their responses for Wave 24 would be coded as NA.  
+* Pew Research Center should capture sexuality as a demographic  
+* Qualitative analysis, including content and sentiment analysis is just as vital as statistical analyses when looking at topics such as online harassment. 
+
+THANK YOU!!! 
